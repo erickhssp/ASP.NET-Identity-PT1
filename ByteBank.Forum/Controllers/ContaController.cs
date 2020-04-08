@@ -2,6 +2,7 @@
 using ByteBank.Forum.ViewModels;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
+using Microsoft.AspNet.Identity.Owin;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,24 @@ namespace ByteBank.Forum.Controllers
 {
     public class ContaController : Controller
     {
-        // GET: Conta
+        private UserManager<UsuarioAplicacao> _userManager;
+        public UserManager<UsuarioAplicacao> UserManager
+        {
+            get
+            {
+                if (_userManager == null)
+                {
+                    var contextoOwin = HttpContext.GetOwinContext();
+                    _userManager = contextoOwin.GetUserManager<UserManager<UsuarioAplicacao>>();
+                }
+                return _userManager;
+            }
+            set
+            {
+                UserManager = value;
+            }
+        }
+
         public ActionResult Registrar()
         {
             return View();
@@ -25,18 +43,13 @@ namespace ByteBank.Forum.Controllers
 
             if (ModelState.IsValid)
             {
-                var dbContext = new IdentityDbContext<UsuarioAplicacao>("DefaultConnection");
-                var userStore = new UserStore<UsuarioAplicacao>(dbContext);
-                var userManager = new UserManager<UsuarioAplicacao>(userStore);
-
-
 
                 var novoUsuario = new UsuarioAplicacao();
 
                 novoUsuario.Email = modelo.Email;
                 novoUsuario.UserName = modelo.UserName;
                 novoUsuario.NomeCompleto = modelo.NomeCompleto;
-               await userManager.CreateAsync(novoUsuario, "123456");
+                await UserManager.CreateAsync(novoUsuario, "123456");
 
                 // Podemos incluir o usuario
                 return RedirectToAction("Index", "Home");
