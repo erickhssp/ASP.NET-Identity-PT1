@@ -43,6 +43,11 @@ namespace ByteBank.Forum
                         ObrigatorioLowerCase = true,
                         ObrigatorioUpperCase = true
                     };
+                    userManager.EmailService = new EmailServico();
+                    var dataProtectionProvider = opcoes.DataProtectionProvider;
+                    var dataProtectionProviderCreated = dataProtectionProvider.Create("ByteBank.Forum");
+                    userManager.UserTokenProvider = new DataProtectorTokenProvider<UsuarioAplicacao>(dataProtectionProviderCreated);
+
                     return userManager;
                 });
         }
